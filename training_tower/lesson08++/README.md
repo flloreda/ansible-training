@@ -103,6 +103,8 @@ It is important to bear in mind:
 -   Update Ansible Tower Project or to be selected "update on launch" option in Job Template configuration
 -   Pay special attention to "Create a new file..." tasks because it is possible to need new files in the repository
 -   ***BONUS ACTIVITY** These playbooks will need Jinja2 templates
+-   El systemrole de timesync necesita que esté habilitada la cache de facts y que haya un job que haga un gather facts:yes con la cache de facts habilitada para refrescarla
+-   Eliminar de /etc/httpd/conf/httpd.conf los Listen adicionales al 80 de pasados ejercicios y los virtual host
 
 ## Steps
 
