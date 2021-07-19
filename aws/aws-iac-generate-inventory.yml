@@ -1,5 +1,5 @@
 ##
-# $ ansible-playbook aws-generate-inventory.yml
+# $ ansible-playbook aws-iac-generate-inventory.yml
 ##
 
 - hosts: localhost
