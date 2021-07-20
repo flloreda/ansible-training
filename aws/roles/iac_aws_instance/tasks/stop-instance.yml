@@ -1,0 +1,32 @@
+- name: "Stopping the selected instance..."
+  debug:
+    msg: "Stopping {{ instance }} Instance..."
+
+- name: "Fail when a mandatory extra vars are not defined"
+  fail:
+    msg: "AWS neccesary variable is not included"
+  when:
+    - instance is not defined
+    - wait is not defined
+
+# - name: "Obtain Subnet ID"
+#   ec2_vpc_subnet_facts:
+#     filters:
+#       "tag:Name": "{{ subnet }}"
+#       "tag:project": "{{ project }}"
+#   register: subnet_tags
+
+- name: "Search if {{ instance }} instance exits"
+  ec2_instance_facts:
+    filters:
+      "tag:Name": "{{ instance }}"
+      "tag:project": "{{ project }}"
+  register: instance_tags
+
+- name: "Stopping EC2 instances"
+  ec2_instance:
+    instance_ids: "{{ instance_tags.instances[0].instance_id }}"
+    state: stopped
+    validate_certs: no
+    wait: "{{ wait }}"
+  when: instance_tags.instances[0] is defined and instance is match('student22')

@@ -106,7 +106,7 @@ instances:
           - ssh_rule
           - http_rule
           - mysql_rule
-            
+
     - name: student02
       key: ansiblepoc
       type: t2.micro

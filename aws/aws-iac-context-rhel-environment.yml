@@ -28,6 +28,9 @@
     - "./vars/aws-{{ environment }}-{{ version }}.yml"
 
   tasks:
+    - name: Set ssh_private_key_file fact
+      set_fact:
+        ssh_private_key_file: ../../ansiblepoc.pem
     - name: Extract EC2 instance information
       include_role:
         name: iac_aws_instance
@@ -45,9 +48,9 @@
 
   tags:
     - generalsubs
-  
+
   vars:
-    ansible_ssh_private_key_file: /root/SABIS_AnsibleWorkshop/ansiblepoc.pem
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
     ansible_python_interpreter: /bin/python3
 
   vars_prompt:
@@ -59,7 +62,7 @@
   tasks:
 
     - name: Register Red Hat instance with auto-subscribe
-      shell: subscription-manager config --rhsm.manage_repos=1 && subscription-manager register --username "{{ rh_cdn_user }}" --password "{{ rh_cdn_pass }}" --force  --auto-attach 
+      shell: subscription-manager config --rhsm.manage_repos=1 && subscription-manager register --username "{{ rh_cdn_user }}" --password "{{ rh_cdn_pass }}" --force  --auto-attach
       when:
         - ansible_facts.os_family == "RedHat"
       ignore_errors: true
@@ -76,15 +79,15 @@
     - users
 
   vars:
-    ansible_ssh_private_key_file: /root/SABIS_AnsibleWorkshop/ansiblepoc.pem
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
     ansible_python_interpreter: /bin/python3
 
 
   tasks:
-  
+
     - debug:
         var: inventory_hostname
-  
+
     - name: Generate complex password
       set_fact:
         new_user_strong_pass: "{{ new_user_pass_prefix }}{{ inventory_hostname }}"
@@ -98,7 +101,7 @@
         name: "{{ inventory_hostname }}"
         password: "{{ new_hash_pass }}"
         group: wheel
-    
+
     - name: Create user on classroom
       user:
         name: "{{ inventory_hostname }}"
@@ -107,15 +110,14 @@
       delegate_to: classroom01
 
     - name: Install packages
-      shell: yum install -y git mariadb python3-PyMySQL cockpit
-      #dnf: 
-      #  name: "{{ item }}"
-      #  state: present
-      #loop:
-      #  - git
-      #  - mariadb
-      #  - python3-PyMySQL
-      #  - cockpit
+      # shell: yum install -y git mariadb python3-PyMySQL cockpit
+      package:
+        name:
+          - git
+          - mariadb
+          - python3-PyMySQL
+          - cockpit
+        state: present
 
     - name: Enable Cockpit socket
       shell: systemctl enable --now cockpit.socket
@@ -134,7 +136,7 @@
         name: sshd
         state: restarted
         enabled: yes
-    
+
 - hosts: classroom*
   user: ec2-user
   become: true
@@ -143,15 +145,18 @@
     - classroom
 
   vars:
-    ansible_ssh_private_key_file: /root/SABIS_AnsibleWorkshop/ansiblepoc.pem
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
     ansible_python_interpreter: /bin/python3
 
   tasks:
     - name: Install package http
-      shell: yum install -y httpd python3-PyMySQL mariadb
-      # dnf:
-      #   name: httpd
-      #   state: present
+      # shell: yum install -y httpd python3-PyMySQL mariadb
+      package:
+        name:
+          - httpd
+          - python3-PyMySQL
+          - mariadb
+        state: present
 
     - name: Enable and Up httpd
       service:
@@ -168,7 +173,6 @@
       notify: Restart SSHD
 
   handlers:
-
     - name: Restart SSHD
       service:
         name: sshd
@@ -183,20 +187,19 @@
     - ansibletower
 
   vars:
-    ansible_ssh_private_key_file: /root/SABIS_AnsibleWorkshop/ansiblepoc.pem
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
     ansible_python_interpreter: /bin/python3
 
   tasks:
     - shell: subscription-manager repos --enable ansible-2.9-for-rhel-8-x86_64-rpms
 
-    - name: Install packages 
-      shell: yum install -y ansible wget
-      # package:
-      #   name: "{{ item }}"
-      #   state: present
-      # loop:
-      #   - ansible
-      #   - wget
+    - name: Install packages
+      # shell: yum install -y ansible wget
+      package:
+        name:
+          - ansible
+          - wget
+        state: present
 
 - hosts: ansibletower*
   user: ec2-user
@@ -206,19 +209,22 @@
     - ansibletowerkeys
 
   vars:
-    ansible_ssh_private_key_file: /root/SABIS_AnsibleWorkshop/ansiblepoc.pem
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
     ansible_python_interpreter: /bin/python3
-  
+
 
   tasks:
     - shell: subscription-manager repos --enable ansible-2.9-for-rhel-8-x86_64-rpms
 
-    - name: Install packages 
-      shell: yum install -y ansible rhel-system-roles
-    
+    - name: Install packages
+      # shell: yum install -y ansible rhel-system-roles
+      package:
+        name: rhel-system-roles
+        state: present
+
     - name: Copy SSH keys (Pub)
       copy:
-        src: /root/SABIS_AnsibleWorkshop/tower_cluster.pem.pub
+        src: "{{ hostvars.localhost.ssh_private_key_file }}.pub"
         dest: /root/.ssh/id_rsa.pub
         owner: root
         group: root
@@ -226,7 +232,7 @@
 
     - name: Copy SSH keys (Priv)
       copy:
-        src: /root/SABIS_AnsibleWorkshop/tower_cluster.pem
+        src: "{{ hostvars.localhost.ssh_private_key_file }}"
         dest: /root/.ssh/id_rsa
         owner: root
         group: root
@@ -234,7 +240,7 @@
 
     - name: Copy SSH keys (Authorized)
       copy:
-        src: /root/SABIS_AnsibleWorkshop/tower_cluster.pem.pub
+        src: "{{ hostvars.localhost.ssh_private_key_file }}.pub"
         dest: /root/.ssh/authorized_keys
         owner: root
         group: root
