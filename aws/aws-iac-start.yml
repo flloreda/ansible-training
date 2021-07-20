@@ -1,0 +1,37 @@
+##
+# ansible-playbook aws-iac-stop.yml
+##
+
+- hosts: localhost
+  connection: local
+
+  vars:
+    environment: "{{ ENV | default('preproduction')}}"
+    version: "{{ VER | default('latest') }}"
+    defined_instances: []
+
+  vars_files:
+    - "./vars/aws-{{ environment }}-{{ version }}.yml"
+
+  tasks:
+
+    - name: Collect EC2 instances in data structures
+      set_fact:
+        defined_instances: "{{ defined_instances }} + [ '{{ item.name }}' ]"
+      loop: "{{ instances }}"
+
+    - name: Collect current EC2 instances on AWS
+      ec2_instance_facts:
+        filters:
+           "tag:project": "{{ project_id }}"
+      register: current_instances
+
+    - name: Starting EC2 instances on AWS
+      include_role:
+        name: iac_aws_instance
+      vars:
+        action: start
+        project: "{{ project_id }}"
+        instance: "{{ item.name }}"
+        wait: "no"
+      loop: "{{ instances }}"
