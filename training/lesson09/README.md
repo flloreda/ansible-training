@@ -25,8 +25,8 @@ In order to assist this laboratory implementation, a set of resources have been 
         -   Client IP variable named "mysql_client_ip" with value <ip_classroom_instance>
         -   List or Array of packages named "mysql_packages" with "mariadb-server" and "python3-PyMySQL" included
     -   Install the list of packages
-    -   Start mysqld service if installation packages has changed 
-    -   Restart mysqld service if installation packages has not changed
+    -   Start mariadb service if installation packages has changed 
+    -   Restart mariadb service if installation packages has not changed
     -   Create two new mysql databases using "mysql_db" variable
     -   Create a new user using "mysql_name" and "mysql_pass" variables with read/write rights to "mysql_db" databases from host "mysql_client_ip"
     -   Import `usertable.mysql` table file into both "mysql_db" databases delegating the operation to <mysql_client_ip> instance
