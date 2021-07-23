@@ -33,5 +33,5 @@
         action: stop
         project: "{{ project_id }}"
         instance: "{{ item.name }}"
-        wait: "yes"
+        wait: "no"
       loop: "{{ instances }}"

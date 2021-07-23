@@ -29,4 +29,6 @@
     state: started
     validate_certs: no
     wait: "{{ wait }}"
-  when: instance_tags.instances[0] is defined and instance is match('student22')
+  when: instance_tags.instances[0] is defined
+  ignore_errors: true
+...

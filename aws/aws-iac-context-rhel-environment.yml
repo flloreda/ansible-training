@@ -28,9 +28,10 @@
     - "./vars/aws-{{ environment }}-{{ version }}.yml"
 
   tasks:
-    - name: Set ssh_private_key_file fact
+    - name: Set ssh_private_cert_file and ssh_private_key_file facts
       set_fact:
-        ssh_private_key_file: ../../ansiblepoc.pem
+        ssh_private_cert_file: ../../ansiblepoc.pem
+        ssh_private_key_file: ../../tower_cluster_id_rsa
     - name: Extract EC2 instance information
       include_role:
         name: iac_aws_instance
@@ -50,7 +51,7 @@
     - generalsubs
 
   vars:
-    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_cert_file }}"
     ansible_python_interpreter: /bin/python3
 
   vars_prompt:
@@ -79,7 +80,7 @@
     - users
 
   vars:
-    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_cert_file }}"
     ansible_python_interpreter: /bin/python3
 
 
@@ -145,7 +146,7 @@
     - classroom
 
   vars:
-    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_cert_file }}"
     ansible_python_interpreter: /bin/python3
 
   tasks:
@@ -187,7 +188,7 @@
     - ansibletower
 
   vars:
-    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_key_file }}"
+    ansible_ssh_private_key_file: "{{ hostvars.localhost.ssh_private_cert_file }}"
     ansible_python_interpreter: /bin/python3
 
   tasks:
